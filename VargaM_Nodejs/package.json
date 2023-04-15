@@ -1,0 +1,30 @@
+{
+  "name": "prf_vargam_nodejs",
+  "version": "1.0.0",
+  "description": "prf beadando by varga m",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matias10008/prf_by_VargaM.git"
+  },
+  "keywords": [
+    "prf"
+  ],
+  "author": "Varga Mate (BI6N82)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matias10008/prf_by_VargaM/issues"
+  },
+  "homepage": "https://github.com/matias10008/prf_by_VargaM#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.0.3"
+  },
+  "engines": {
+    "node": "18.16"
+  }
+}
