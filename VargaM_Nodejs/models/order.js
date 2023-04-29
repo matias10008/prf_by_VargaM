@@ -3,18 +3,18 @@ const Schema = mongoose.Schema;
 const bcrypt = require('bcryptjs');
 
 const OrderSchema = new Schema({
-    name: String,
-    address: String,
+    name: {type: String, unique: true, required: true},
+    address: {type: String, required: true},
     tyres: [{
         tyre: {
             type: Schema.Types.ObjectId,
-            ref:"Tyres"
+            ref:"Tyre"
         },
         quantity: {
             type: Number,
             default : 1
         },
     },],
-});
+}, {collection:'Orders'});
 
-module.exports = mongoose.model("Order", OrderSchema);
+module.exports = mongoose.model('Order', OrderSchema);

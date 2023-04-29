@@ -3,22 +3,11 @@ const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
 
 const UserSchema = new Schema({
-    email: {
-      type: String,
-      unique: true,
-      lowercase: true
-    },
-    name: String,
-    password: String,
-    address: {
-      addr1: String,
-      addr2: String,
-      city: String,
-      state: String,
-      country: String,
-      postalCode: String,
-    },
-});
+    email: {type: String,unique: true, required: true},
+    name: {type: String,required: true },
+    password: {type: String, required: true},
+    address: {type: String, required: true}
+}, {collection:'Users'});
 
 UserSchema.pre("save", function (next) {
     var user = this;
@@ -37,5 +26,4 @@ UserSchema.pre("save", function (next) {
         return bcrypt.compareSync(password, this.password);
       };
 
-      //Exporting the Review schema to reuse
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model('User', UserSchema);

@@ -17,6 +17,11 @@ const dbUrl = 'mongodb+srv://admin:asdasdasd@prf-beadando-cluster.m6x1cnh.mongod
 
 //const dbUrl = 'mongodb://localhost:1586';
 
+app.use(cors({
+    origin: 'http://localhost:4200',
+    credentials: true
+  }));
+
 mongoose.connect(dbUrl);
 
 mongoose.connection.on('connected', () => {
@@ -43,7 +48,7 @@ const whiteList = ['http://localhost:4200'];
 
 
 app.use((req, res, next) => {
-    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Origin', 'http://localhost:4200');
     res.set('Access-Control-Allow-Credentials', 'true');
     if (req.method === 'OPTIONS') {
         // Send response to OPTIONS requests
@@ -51,7 +56,7 @@ app.use((req, res, next) => {
         res.set('Access-Control-Allow-Headers', 'Content-Type');
         res.set('Access-Control-Max-Age', '3600');
     }
-    next();
+    next(); 
 })
 
 passport.use('User', new localStrategy(function (username, password, done) {
@@ -77,7 +82,7 @@ passport.deserializeUser(function (user, done) {
     return done(null, user);
 });
 
-app.use(expressSession({ secret: 'remelematmegyekebbol', resave: true }));
+app.use(expressSession({ secret: 'remelematmegyekebbol', resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -88,21 +93,13 @@ app.use(express.static(path.join(__dirname, 'public')))
 .get('/', (req, res) => res.render('pages/index'))
 
 
-app.get('/', (req, res, next) => {
-    res.send('Hello World!');
-})
-
 app.use('/', require('./routes'));
-
-// REST - Representative State Transfer, GET - Read, POST - Create, PUT - Update, DELETE - Delete
-
-app.use((req, res, next) => {
-    console.log('ez a hibakezelo');
-    res.status(404).send('A kert eroforras nem talalhato');
-})
 
 app.listen(port, () => {
     console.log('The server is running!');
 })
 
-// a parancssorbol futo szervert Ctrl-C billentyukomboval allitom meg
+app.use((req, res, next) => {
+    console.log('ez a hibakezelo');
+    res.status(404).send('A kert eroforras nem talalhato');
+})
