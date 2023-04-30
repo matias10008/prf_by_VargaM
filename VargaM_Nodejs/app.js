@@ -15,7 +15,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const dbUrl = 'mongodb+srv://admin:asdasdasd@prf-beadando-cluster.m6x1cnh.mongodb.net/test'
 
-//const dbUrl = 'mongodb://localhost:1586';
+const user_model = mongoose.model('User');
 
 app.use(cors({
     origin: 'http://localhost:4200',
@@ -36,10 +36,6 @@ require('./models/user');
 require('./models/tyre');
 require('./models/order');
 
-const user_model = mongoose.model('User');
-const tyre_model = mongoose.model('Tyre');
-const order_model = mongoose.model('Order');
-
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({}));
@@ -58,18 +54,32 @@ app.use((req, res, next) => {
     }
     next(); 
 })
-
-passport.use('User', new localStrategy(function (username, password, done) {
-    user.findOne({ username: username }, function (err, user) {
-        if (err) return done('Hiba lekeres soran', null);
-        if (!user) return done('Nincs ilyen felhasználónév', null);
-        user.comparePasswords(password, function (error, isMatch) {
-            if (error) return done(error, false);
-            if (!isMatch) return done('Hibas jelszo', false);
-            return done(null, user);
-        })
-    })
-}));
+passport.use('user', new localStrategy({ usernameField: 'username' }, async (username, password, done) => {
+    try {
+      // Keresd meg a felhasználót az adatbázisban
+      const user = await user_model.findOne({ username: username });
+  
+      // Ha nincs ilyen felhasználó, jelezd a hibát
+      if (!user) {
+        return done(null, false, { message: 'Helytelen felhasználónév vagy jelszó' });
+      }
+  
+      // Ellenőrizd a jelszót
+      const isPasswordValid = user.comparePassword(password);
+  
+      // Ha a jelszó helytelen, jelezd a hibát
+      if (!isPasswordValid) {
+        return done(null, false, { message: 'Helytelen felhasználónév vagy jelszó' });
+      }
+  
+      // Ha minden rendben, léptesd be a felhasználót
+      return done(null, user);
+    } catch (error) {
+      // Ha bármilyen hiba adódik, hívjuk meg a done függvényt az error paraméterrel
+      return done(error);
+    }
+  }));
+  
 
 
 passport.serializeUser(function (user, done) {

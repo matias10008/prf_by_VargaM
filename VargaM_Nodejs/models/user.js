@@ -3,24 +3,27 @@ const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
 
 const UserSchema = new Schema({
+    username: {type: String,required: true },
     email: {type: String,unique: true, required: true},
-    name: {type: String,required: true },
     password: {type: String, required: true},
-    address: {type: String, required: true}
 }, {collection:'Users'});
 
-UserSchema.pre("save", function (next) {
-    var user = this;
-  
-    if (!user.isModified("password")) return next();
-  
-    bcrypt.hash(user.password, null, null, function (err, hash) {
-      if (err) return next(err);
-  
-      user.password = hash;
-      next();
-    });
-  });
+UserSchema.pre('save', async function(next) {
+  // Csak akkor hash-eljük a jelszót, ha az valóban módosult (új jelszó vagy módosítás)
+  if (this.isModified('password')) {
+    try {
+      // Generáljunk egy sót (salt) a jelszó hash-eléséhez
+      const salt = await bcrypt.genSalt(10);
+      
+      // Hash-eljük a jelszót a sóval
+      this.password = await bcrypt.hash(this.password, salt);
+    } catch (err) {
+      console.error('Hiba a jelszó hash-elése közben:', err);
+      return next(err);
+    }
+  }
+  next();
+});
     
     UserSchema.methods.comparePassword = function (password) {
         return bcrypt.compareSync(password, this.password);
