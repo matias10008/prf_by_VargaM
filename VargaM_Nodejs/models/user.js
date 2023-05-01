@@ -9,20 +9,22 @@ const UserSchema = new Schema({
 }, {collection:'Users'});
 
 UserSchema.pre('save', async function(next) {
-  // Csak akkor hash-eljük a jelszót, ha az valóban módosult (új jelszó vagy módosítás)
   if (this.isModified('password')) {
     try {
-      // Generáljunk egy sót (salt) a jelszó hash-eléséhez
       const salt = await bcrypt.genSalt(10);
       
-      // Hash-eljük a jelszót a sóval
       this.password = await bcrypt.hash(this.password, salt);
     } catch (err) {
       console.error('Hiba a jelszó hash-elése közben:', err);
       return next(err);
     }
   }
-  next();
+  if(!this.email.includes("@")){
+    const error = new Error("Nem megfelelő emailcím");
+    next(error);
+  } else{
+    next();
+  }
 });
     
     UserSchema.methods.comparePassword = function (password) {

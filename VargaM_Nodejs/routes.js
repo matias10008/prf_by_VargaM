@@ -83,10 +83,106 @@ router.route('/status').get((req, res, next) => {
     }
     
 })
-
+//Tyre lekeres
 router.get('/products', (req, res) => {
   tyre_model.find()
     .then(tyres => res.status(200).json(tyres))
+    .catch(err => res.status(500).send('DB hiba: ' + err));
+});
+
+//Addtyre
+router.post('/addtyre', (req, res) => {
+  console.log(req.body);
+  if (req.body.newtyreName && req.body.newtyreType && req.body.newtyreWidth && req.body.newtyreHeight && req.body.newtyreDiameter && req.body.newtyrePrice ) {
+    tyre_model.findOne({ newtyreName: req.body.newtyreName, newtyreType: req.body.newtyreType,
+      newtyreWidth: req.body.newtyreWidth, newtyreHeight: req.body.newtyreHeight,
+      newtyreDiameter: req.body.newtyreDiameter,newtyrePrice: req.body.newtyrePrice
+     })
+      .then(tyre => {
+        if (tyre) {
+          return res.status(400).send('Hiba, már létezik ilyen Abroncs');
+        }
+
+        const newtyreName = req.body.newtyreName;
+        const newtyreType = req.body.newtyreType;
+        const newtyreWidth = req.body.newtyreWidth;
+        const newtyreHeight = req.body.newtyreHeight;
+        const newtyreDiameter = req.body.newtyreDiameter;
+        const newtyrePrice = req.body.newtyrePrice;
+        const newTyre = new tyre_model({
+          name : newtyreName,
+          type: newtyreType,
+          price: newtyrePrice,
+          width : newtyreWidth,
+          height : newtyreHeight,
+          diameter : newtyreDiameter
+        });
+        newTyre.save()
+        .then(() => res.status(200).send('Sikeresen hozzáadta az abroncsot!'))
+        .catch(err => {
+          res.status(500).send('A hozzáadás során hiba történt');
+        }); 
+      })
+      .catch(err => res.status(500).send('DB hiba')); 
+  } else {
+    return res.status(400).send('Hibás kérés, a gumiabroncs hozzáadásakot');
+  }
+});
+
+router.post('/deleteTyre', (req, res) => {
+  console.log(req.body);
+  if (req.body.tyreName && req.body.tyrePrice ) {
+        tyre_model.deleteOne({name: req.body.tyreName,price: req.body.tyrePrice})
+        .then(() => res.status(200).send('Sikeresen törölted az abroncsot!'))
+        .catch(err => {
+          res.status(500).send('A törlés során hiba történt');
+        }); 
+      }
+    }
+);
+
+router.post('/updateTyre', async (req, res) => {
+  const { oldTyre, updatedTyre } = req.body;
+
+  try {
+    const tyre = await tyre_model.findOne({ name: oldTyre.name, type: oldTyre.type });
+    if (!tyre) {
+      return res.status(404).json({ message: 'Tyre not found' });
+    }
+
+    Object.assign(tyre, updatedTyre);
+    await tyre.save();
+    res.status(200).json({ message: 'Tyre updated successfully' });
+  } catch (error) {
+    console.error('Error in updateTyre route:', error);
+    res.status(500).json({ message: 'An error occurred during the update', error });
+  }
+});
+
+//User lekeres
+router.get('/users', (req, res) => {
+  user_model.find()
+    .then(users => res.status(200).json(users))
+    .catch(err => res.status(500).send('DB hiba: ' + err));
+});
+
+//user torles
+router.post('/deleteUser', (req, res) => {
+  console.log(req.body);
+  if (req.body.username && req.body.email ) {
+        user_model.deleteOne({username: req.body.username,email: req.body.email})
+        .then(() => res.status(200).send('Sikeresen törölted a felhasználót!'))
+        .catch(err => {
+          res.status(500).send('A törlés során hiba történt');
+        }); 
+      }
+    }
+);
+
+//Order lekeres
+router.get('/orders', (req, res) => {
+  order_model.find()
+    .then(users => res.status(200).json(users))
     .catch(err => res.status(500).send('DB hiba: ' + err));
 });
 
