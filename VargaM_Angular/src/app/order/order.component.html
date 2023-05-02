@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .menu {
+  display: flex;
+  justify-content: space-around;
+  background-color: #333;
+  padding: 1rem;
+}
+
+.menu-item {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.menu-item:hover {
+  background-color: gray;
+}
+  </style>
+</head>
+<body>
+  <nav class="menu">
+    <a (click)="logout()" class="menu-item">Logout</a>
+  <a href="/products" class="menu-item">Product</a>
+  <a href="/order" class="menu-item">Cart</a>
+  </nav>
+  <div class="container mt-2">
+    <div class="row">
+      <div class="col-sm-12">
+        <h1 class="text-center">Your Cart:</h1>
+        <table class="text-center w-100 mb-2" *ngIf="cartItems.length > 0; else emptyCart">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Width</th>
+              <th>Height</th>
+              <th>Diameter</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let items of cartItems">
+              <td>{{ items.name }}</td>
+              <td>{{ items.type }}</td>
+              <td>{{ items.width }}</td>
+              <td>{{ items.height }}</td>
+              <td>{{ items.diameter }}</td>
+              <td>{{ items.price }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #emptyCart>
+          <p class="text-center">Looks like your cart is empty.</p>
+        </ng-template>
+        <div class="text-center mt-2" *ngIf="cartItems.length > 0">
+          <button type="button" class="btn btn-primary" (click)="clearCart()"> Clear Cart</button>
+        </div>
+        <div *ngIf="cartItems.length > 0" class="row">
+          <div class="col-sm-6 offset-md-3">
+
+            <h3 class="text-center my-2">Delivery information:</h3>
+            <div>
+              <label>Billing Name:</label>
+              <input class="form-control w-100 text-center" [(ngModel)] ="billingName" placeholder="Name" type="text" id="billingName">
+            </div>
+            <div>
+              <label>Address:</label>
+              <input class="form-control w-100 text-center" [(ngModel)] ="address" placeholder="Address" type="text" id="address">
+            </div>
+            <div class=" text-center my-4">
+              <button type="button" class="btn btn-primary" (click)="confirmOrder()"> Confirm Order</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+  </body>
+</html>

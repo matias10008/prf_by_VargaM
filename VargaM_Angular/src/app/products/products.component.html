@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .menu {
+  display: flex;
+  justify-content: space-around;
+  background-color: #333;
+  padding: 1rem;
+}
+
+.menu-item {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.menu-item:hover {
+  background-color: gray;
+}
+  </style>
+</head>
+<body>
+  <nav class="menu">
+    <a (click)="logout()" class="menu-item">Logout</a>
+  <a href="/products" class="menu-item">Product</a>
+  <a href="/order" class="menu-item">Cart</a>
+  </nav>
+  <div class="container mt-2">
+    <div class="row">
+      <div class="col-sm-12">
+        <span>You logged in as {{username}}!</span>
+        <h3 class="text-center">Currently Available Tyres:</h3>
+        <table class="text-center w-100">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Width</th>
+              <th>Height</th>
+              <th>Diameter</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tyre of tyres">
+              <td>{{ tyre.name }}</td>
+              <td>{{ tyre.type }}</td>
+              <td>{{ tyre.width }}</td>
+              <td>{{ tyre.height }}</td>
+              <td>{{ tyre.diameter }}</td>
+              <td>{{ tyre.price }}</td>
+              <td>
+                <button
+                type="button"
+                class="btn btn-primary"
+                (click)="addToCart(tyre)"
+              >
+                Add to Cart
+              </button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

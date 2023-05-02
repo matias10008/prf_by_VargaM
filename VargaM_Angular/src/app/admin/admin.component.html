@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .menu {
+  display: flex;
+  justify-content: space-around;
+  background-color: #333;
+  padding: 1rem;
+}
+
+.menu-item {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.menu-item:hover {
+  background-color: gray;
+}
+  </style>
+</head>
+<body>
+  <nav class="menu">
+    <a (click)="logout()" class="menu-item">Logout</a>
+  </nav>
+  <div class="container mt-2">
+    <div class="row">
+      <div class="col-sm-12">
+        <h3 class="text-center mb-3">Currently Available Tyres:</h3>
+        <table class="text-center w-100">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Width</th>
+              <th>Height</th>
+              <th>Diameter</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="text-center">
+              <td><input class="form-control w-100 text-center" [(ngModel)] ="newtyreName" placeholder="Name" type="text" id="newtyreName"></td>
+              <td><input class="form-control w-100 text-center" [(ngModel)] ="newtyreType" placeholder="Type" type="text" id="newtyreType"></td>
+              <td><input class="form-control w-100 text-center" [(ngModel)] ="newtyreWidth" placeholder="Width" type="number" id="newtyreWidth"></td>
+              <td><input class="form-control w-100 text-center" [(ngModel)] ="newtyreHeight" placeholder="Height" type="number" id="newtyreHeight"></td>
+              <td><input class="form-control w-100 text-center" [(ngModel)] ="newtyreDiameter" placeholder="Diameter" type="text" id="newtyreDiameter"></td>
+              <td><input class="form-control w-100 text-center" [(ngModel)] ="newtyrePrice" placeholder="Price" type="text" id="newtyrePrice"></td>
+              <td><button class="btn btn-primary" (click)="addTyre()">Add</button></td>
+            </tr>
+            <tr *ngFor="let tyre of tyres">
+              <td> {{tyre.name}}</td>
+              <td> {{tyre.type}}</td>
+              <td> {{tyre.width}}</td>
+              <td> {{tyre.height}}</td>
+              <td> {{tyre.diameter}}</td>
+              <td> {{tyre.price}}</td>
+              <td>
+                <button type="button" class="btn btn-primary" (click)="openModal(tyre)" data-bs-toggle="modal" data-bs-target="#modifyModal">
+                  Modify
+                </button>
+                <button class="btn btn-secondary" (click)="deleteTyre(tyre.name, tyre.price)">Delete</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <h3 class="text-center">Users:</h3>
+      <table class="text-center w-100">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let user of users">
+            <tr *ngIf="!(user.username === 'admin2' && user.email === 'admin2@admin2.hu')">
+              <td>{{user.username}}</td>
+              <td>{{user.email}}</td>
+              <td><button class="btn btn-secondary" (click)="deleteUser(user.username, user.email)">Delete</button></td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+    <div class="row">
+      <h3 class="text-center"> Orders:</h3>
+      <table class="text-center w-100">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Items</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of orders" class="my-2">
+            <td> {{order.name}}</td>
+            <td> {{order.address}}</td>
+            <td>
+              <ul class="list-unstyled">
+                <li *ngFor="let tyreId of order.tyres">
+                  {{getTyreNameById(tyreId)}}
+                </li>
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="modal fade" id="modifyModal" tabindex="-1" aria-labelledby="modifyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modifyModalLabel">Modify Tyre</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col">
+              <p>Original values:</p>
+              <div class="my-2">
+               Name: {{ currentTyre.name }}
+              </div>
+              <div class="my-2">
+              Type: {{ currentTyre.type }}
+              </div>
+              <div class="my-2">
+              Width: {{ currentTyre.width }}
+              </div>
+              <div class="my-2">
+              Height: {{ currentTyre.height }}
+              </div>
+              <div class="my-2">
+              Diameter: {{ currentTyre.diameter }}
+              </div>
+              <div class="my-2">
+              Price: {{ currentTyre.price }}
+              </div>
+            </div>
+            <div class="col">
+              <p>New values:</p>
+              <form>
+                <div class="mb-3">
+                  <label for="newName" class="form-label">Name:</label>
+                  <input type="text" class="form-control" [(ngModel)] ="updatetyreName" id="newName" name="newName">
+                </div>
+                <div class="mb-3">
+                  <label for="newType" class="form-label">Type:</label>
+                  <input type="text" class="form-control" [(ngModel)] ="updatetyreType" id="newType" name="newType">
+                </div>
+                <div class="mb-3">
+                  <label for="newWidth" class="form-label">Width:</label>
+                  <input type="number" class="form-control" [(ngModel)] ="updatetyreWidth" id="newWidth" name="newWidth">
+                </div>
+                <div class="mb-3">
+                  <label for="newHeight" class="form-label">Height:</label>
+                  <input type="number" class="form-control" [(ngModel)] ="updatetyreHeight" id="newHeight" name="newHeight">
+                </div>
+                <div class="mb-3">
+                  <label for="newDiameter" class="form-label">Diameter:</label>
+                  <input type="text" class="form-control" [(ngModel)] ="updatetyreDiameter" id="newDiameter"name="newDiameter">
+                </div>
+                <div class="mb-3">
+                  <label for="newPrice" class="form-label">Price:</label>
+                  <input type="text" class="form-control" [(ngModel)] ="updatetyrePrice"  id="newPrice"  name="newPrice">
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" (click)="updateTyre(currentTyre.name,currentTyre.type,currentTyre.width,currentTyre.height,currentTyre.diameter,currentTyre.price )">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
