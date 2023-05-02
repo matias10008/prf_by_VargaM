@@ -56,26 +56,16 @@ app.use((req, res, next) => {
 })
 passport.use('user', new localStrategy({ usernameField: 'username' }, async (username, password, done) => {
     try {
-      // Keresd meg a felhasználót az adatbázisban
       const user = await user_model.findOne({ username: username });
-  
-      // Ha nincs ilyen felhasználó, jelezd a hibát
       if (!user) {
         return done(null, false, { message: 'Helytelen felhasználónév vagy jelszó' });
       }
-  
-      // Ellenőrizd a jelszót
       const isPasswordValid = user.comparePassword(password);
-  
-      // Ha a jelszó helytelen, jelezd a hibát
       if (!isPasswordValid) {
         return done(null, false, { message: 'Helytelen felhasználónév vagy jelszó' });
       }
-  
-      // Ha minden rendben, léptesd be a felhasználót
       return done(null, user);
     } catch (error) {
-      // Ha bármilyen hiba adódik, hívjuk meg a done függvényt az error paraméterrel
       return done(error);
     }
   }));
@@ -110,6 +100,5 @@ app.listen(port, () => {
 })
 
 app.use((req, res, next) => {
-    console.log('ez a hibakezelo');
-    res.status(404).send('A kert eroforras nem talalhato');
+    res.status(404).send('The requested resource cannot be found');
 })

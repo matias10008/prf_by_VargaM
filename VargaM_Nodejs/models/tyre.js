@@ -12,7 +12,7 @@ const TyreSchema = new Schema({
 
   TyreSchema.pre('save',async function (next){
     if(this.name == "" || this.type == "" || this.price == "" || this.width < 50 || this.height < 30 || this.diameter == ""){
-      const error = new Error("Hiba az adatbázisba való mentés közben, valamely érték nem stimmel.");
+      const error = new Error("Error while saving to database, some value is not correct");
       next(error);
     } else{
       next();

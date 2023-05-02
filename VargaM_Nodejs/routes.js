@@ -9,38 +9,35 @@ const order_model = mongoose.model('Order');
 
 
 
-// Bejelentkezes
+//Login
 router.route('/login').post((req, res, next) => {
   if (req.body.username && req.body.password) {
     passport.authenticate('user', (error, user, info) => {
       if (error) {
-        console.error('Authentication error:', error);
         return res.status(500).send(error);
       }
       if (!user) {
-        console.error('Authentication failed:', info);
         return res.status(401).send(info.message);
       }
       req.login(user, function (error) {
         if (error) {
-          console.error('Login error:', error);
           return res.status(500).send(error);
         }
-        return res.status(200).send('Sikeres bejelentkezes!');
+        return res.status(200).send('Successful login!');
       });
     })(req, res, next);
   } else {
-    return res.status(400).send('Hibas keres, username es password kell');
+    return res.status(400).send('Incorrect request, username es password required');
   }
 });
 
-//Regisztracio
+//Register
 router.post('/register', (req, res) => {
   if (req.body.username && req.body.password && req.body.email ) {
     user_model.findOne({ username: req.body.username })
       .then(user => {
         if (user) {
-          return res.status(400).send('Hiba, már létezik ilyen felhasználónév');
+          return res.status(400).send('Error, this username already exists');
         }
 
         const username = req.body.username;
@@ -51,48 +48,41 @@ router.post('/register', (req, res) => {
             email: email,
             password: password
         });
-        console.log('newUser objektum előtt:', newUser);
         newUser.save()
-        .then(() => res.status(200).send('Sikeres regisztráció'))
+        .then(() => res.status(200).send('Successful registration'))
         .catch(err => {
-          res.status(500).send('A mentés során hiba történt');
+          res.status(500).send('An error occurred during the rescue');
         }); 
       })
-      .catch(err => res.status(500).send('DB hiba')); 
+      .catch(err => res.status(500).send('DB problem')); 
   } else {
-    return res.status(400).send('Hibás kérés, username, email és password kell');
+    return res.status(400).send('Incorrect request, username, email and password required');
   }
 });
 
-//Kijelentkezes
+//Logout
 router.route('/logout').post((req, res, next) => {
-    if(req.isAuthenticated()) {
-        req.logout();
-        return res.status(200).send('Kijelentkezes sikeres');
-    } else {
-        return res.status(403).send('Nem is volt bejelentkezve');
-    }
+  if (req.isAuthenticated()) {
+    req.logout((err) => {
+      if (err) {
+        return res.status(500).send('An error occurred during logout');
+      }
+      return res.status(200).send('Successful logout');
+    });
+  } else {
+    return res.status(403).send('It was not even logged in');
+  }
 });
 
-//Status lekerese
-router.route('/status').get((req, res, next) => {
-    if(req.isAuthenticated()) {
-        return res.status(200).send(req.session.passport);
-    } else {
-        return res.status(403).send('Nem is volt bejelentkezve');
-    }
-    
-})
-//Tyre lekeres
+//Tyre get
 router.get('/products', (req, res) => {
   tyre_model.find()
     .then(tyres => res.status(200).json(tyres))
-    .catch(err => res.status(500).send('DB hiba: ' + err));
+    .catch(err => res.status(500).send('DB problem: ' + err));
 });
 
 //Addtyre
 router.post('/addtyre', (req, res) => {
-  console.log(req.body);
   if (req.body.newtyreName && req.body.newtyreType && req.body.newtyreWidth && req.body.newtyreHeight && req.body.newtyreDiameter && req.body.newtyrePrice ) {
     tyre_model.findOne({ newtyreName: req.body.newtyreName, newtyreType: req.body.newtyreType,
       newtyreWidth: req.body.newtyreWidth, newtyreHeight: req.body.newtyreHeight,
@@ -100,9 +90,8 @@ router.post('/addtyre', (req, res) => {
      })
       .then(tyre => {
         if (tyre) {
-          return res.status(400).send('Hiba, már létezik ilyen Abroncs');
+          return res.status(400).send('Error, such a tyre already exists');
         }
-
         const newtyreName = req.body.newtyreName;
         const newtyreType = req.body.newtyreType;
         const newtyreWidth = req.body.newtyreWidth;
@@ -118,24 +107,23 @@ router.post('/addtyre', (req, res) => {
           diameter : newtyreDiameter
         });
         newTyre.save()
-        .then(() => res.status(200).send('Sikeresen hozzáadta az abroncsot!'))
+        .then(() => res.status(200).send('Successfully added the tyre!'))
         .catch(err => {
-          res.status(500).send('A hozzáadás során hiba történt');
+          res.status(500).send('An error occurred during addition');
         }); 
       })
-      .catch(err => res.status(500).send('DB hiba')); 
+      .catch(err => res.status(500).send('DB problem')); 
   } else {
-    return res.status(400).send('Hibás kérés, a gumiabroncs hozzáadásakot');
+    return res.status(400).send('Incorrect request when adding a tyre');
   }
 });
 
 router.post('/deleteTyre', (req, res) => {
-  console.log(req.body);
   if (req.body.tyreName && req.body.tyrePrice ) {
         tyre_model.deleteOne({name: req.body.tyreName,price: req.body.tyrePrice})
-        .then(() => res.status(200).send('Sikeresen törölted az abroncsot!'))
+        .then(() => res.status(200).send('You have successfully deleted the tyre!'))
         .catch(err => {
-          res.status(500).send('A törlés során hiba történt');
+          res.status(500).send('An error occurred during the deletion');
         }); 
       }
     }
@@ -154,36 +142,57 @@ router.post('/updateTyre', async (req, res) => {
     await tyre.save();
     res.status(200).json({ message: 'Tyre updated successfully' });
   } catch (error) {
-    console.error('Error in updateTyre route:', error);
     res.status(500).json({ message: 'An error occurred during the update', error });
   }
 });
 
-//User lekeres
+//User get
 router.get('/users', (req, res) => {
   user_model.find()
     .then(users => res.status(200).json(users))
-    .catch(err => res.status(500).send('DB hiba: ' + err));
+    .catch(err => res.status(500).send('DB problem: ' + err));
 });
 
-//user torles
+//user delete
 router.post('/deleteUser', (req, res) => {
-  console.log(req.body);
   if (req.body.username && req.body.email ) {
         user_model.deleteOne({username: req.body.username,email: req.body.email})
-        .then(() => res.status(200).send('Sikeresen törölted a felhasználót!'))
+        .then(() => res.status(200).send('You have successfully deleted the user!'))
         .catch(err => {
-          res.status(500).send('A törlés során hiba történt');
+          res.status(500).send('An error occurred during the deletion');
         }); 
       }
     }
 );
 
-//Order lekeres
+//Order get
 router.get('/orders', (req, res) => {
   order_model.find()
     .then(users => res.status(200).json(users))
-    .catch(err => res.status(500).send('DB hiba: ' + err));
+    .catch(err => res.status(500).send('DB problem: ' + err));
+});
+
+//Order submit
+router.post('/submitOrder', async (req, res) => {
+  try {
+    const { billingName, address, cartItems } = req.body;
+    const newOrder = new order_model({
+      name:billingName,
+      address:address,
+      tyres:cartItems,
+    });
+    await newOrder.save();
+    res.status(201).json({ message: 'Order successfully created', orderId: newOrder._id });
+  } catch (error) {
+    res.status(500).json({ message: 'Error processing the order', error });
+  }
+});
+
+//Order get
+router.get('/orders', (req, res) => {
+  order_model.find()
+    .then(users => res.status(200).json(users))
+    .catch(err => res.status(500).send('DB problem: ' + err));
 });
 
 module.exports = router;
